@@ -2,20 +2,26 @@ version: '3.9'
 services:
   web:
     build: .
-    command: ./docker-entrypoint.sh
+    command: ./wait-for-it.sh postgres:5432 -- ./docker-entrypoint.sh
     ports:
       - 8000:8000
-    # depends_on:
-    #   - redis
     restart: on-failure
     volumes:
       - .:/app
-  # redis:
-  #   image: redis:6.2-alpine
-  #   ports:
-  #     - 6379:6379
-  #   restart: always
-  #   volumes:
-  #     - redisdata:/data
-# volumes:
-#   redisdata:    
+    # environment:
+    #   - DATABASE_URL=postgres://your_postgres_username:your_postgres_password@postgres:5432/your_postgres_db_name
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_DB: your_postgres_db_name
+      POSTGRES_USER: your_postgres_username
+      POSTGRES_PASSWORD: your_postgres_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
